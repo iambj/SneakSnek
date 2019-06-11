@@ -1,0 +1,4 @@
+include hippo_server/schema.sql
+graft hippo_server/static
+graft hippo_server/templates
+global-exclude *.pyc
