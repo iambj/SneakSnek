@@ -5,3 +5,4 @@ This is a WIP/MVP. SS was created in tandem with a Flask web app. The need to re
 ## TODO
 
 - Command line arg folder targets
+

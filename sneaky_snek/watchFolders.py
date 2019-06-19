@@ -14,11 +14,19 @@ from watchdog.events import FileSystemEventHandler
 
     Docs:
 
+		Import:
+
+			from sneaky_snek import watchFolders
+			handler = watchFolders.Handler()
+
+
         Place a route to the handle_request() function:
 
-            @app.route("/newshit", methods=["GET", 'POST'])
-            def newshit():
+            @app.route("/check_changes", methods=["GET", 'POST'])
+            def check_changes():
                 return Handler.handle_request(app, bytes.decode(request.data))
+
+		Load up a second terminal to your project directory and activate your venv. Run watchdog.py.
 
         Make sure to send the decoded data as plain text.
 
@@ -27,13 +35,15 @@ from watchdog.events import FileSystemEventHandler
 		- Has to be run out of the flask-backend folder. this needs to be more flexible. For the .devtime file. 
 		  But there should be a better way for communication. What is this file solving? Its for the other watchdog to say
 		  Python code changed. Duh. Use mine and disable the apps. 
+		- Still double logs a modified file. For both static and python
 '''
 
 
 class Watcher:
     DIR = "/mnt/c/Users/iambj/Repo/HippoTimes/flask-backend/hippo_server"
     DELAY = 5
-    IGNORED_FILE_EXTS = ['', '.pyy', '.pyc', '.devtime', '.map', '.scss'] # .files are ignored automatically by ''
+    # .files are ignored automatically by ''
+    IGNORED_FILE_EXTS = ['', '.pyy', '.pyc', '.md', '.devtime', '.map', '.scss']
     WATCHED_DIRS = ['static']
     QUIET_MODE = False
 
@@ -42,8 +52,12 @@ class Watcher:
         try:
             if sys.argv[1] in ['-q', '--quiet']:
                 Watcher.QUIET_MODE = True
+
+            if sys.argv[2] in ['-d', '--directory']:
+                Watcher.DIR = sys.argv[3]
         except:
             pass
+
 
     def run(self):
         event_handler = Handler()
@@ -59,7 +73,6 @@ class Watcher:
 
 
 
-
 class Handler(FileSystemEventHandler):
     @staticmethod
     def on_any_event(event):
@@ -69,9 +82,8 @@ class Handler(FileSystemEventHandler):
         #         print(d, e_path)
         #     return
 
-
         ext = path.splitext(event.src_path)
-        # I think this works, it's a little hacky. Probably a more pythonista way to do it. 
+        # I think this works, it's a little hacky. Probably a more pythonista way to do it.
         if '.pyc' in event.src_path or ext[1] in Watcher.IGNORED_FILE_EXTS:
             return
         if event.is_directory:
@@ -83,30 +95,28 @@ class Handler(FileSystemEventHandler):
             Handler.amend_file()
             log("Modified: " + event.src_path)
 
-
-
     @staticmethod
     def amend_file():
-        with open('./hippo_server/.devtime', 'w+') as f:
+        with open(f'{Watcher.DIR}/.devtime', 'w+') as f:
             res = str(datetime.now().timestamp())
             # log(res)
             f.write(res)
             f.close()
 
     @staticmethod
-    def make_new_shit(app):
+    def make_new_shit():
         # Updates the local .devtime file with the latest UNIX timestamp.
         # Call this at the end of the initialization process for the app.
-        with open(app.root_path + "/.devtime", 'w') as f:
+        with open(f'{Watcher.DIR}/.devtime', 'w') as f:
             res = str(datetime.now().timestamp())
             f.write(res)
             f.close()
             # log(res)
 
     @staticmethod
-    def handle_request(app, data):
+    def handle_request(data):
         # now = str(datetime.now().timestamp())
-        with open(app.root_path + "/.devtime", 'r+') as f:
+        with open(f'{Watcher.DIR}/.devtime', 'r+') as f:
             then = f.readline()
             f.close()
         if then == data:
@@ -115,10 +125,10 @@ class Handler(FileSystemEventHandler):
             # Should return JSON
             return then
 
+
 def log(msg):
     if Watcher.QUIET_MODE is False:
         print(msg)
-
 
 
 if __name__ == '__main__':

@@ -18,7 +18,7 @@ let refreshFailed = 0;
 
 
 
-const refreshPoint = "http://localhost:5000/newshit"
+const refreshPoint = "http://localhost:5000/check_changes"
 const params = {
 	'method' : 'POST',
 	'body' : null

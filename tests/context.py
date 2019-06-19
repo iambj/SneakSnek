@@ -11,4 +11,6 @@ import sys
 sys.path.insert(0, os.path.abspath(
     os.path.join(os.path.dirname(__file__), '..')))
 
-import watchFolders
+import sneaky_snek
+
+print(sneaky_snek)
