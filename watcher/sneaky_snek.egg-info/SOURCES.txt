@@ -1,0 +1,9 @@
+README.md
+setup.cfg
+setup.py
+watcher/watchFolders.py
+watcher/sneaky_snek.egg-info/PKG-INFO
+watcher/sneaky_snek.egg-info/SOURCES.txt
+watcher/sneaky_snek.egg-info/dependency_links.txt
+watcher/sneaky_snek.egg-info/requires.txt
+watcher/sneaky_snek.egg-info/top_level.txt
