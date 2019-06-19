@@ -1,0 +1,17 @@
+Metadata-Version: 2.1
+Name: sneaky-snek
+Version: 0.1.1
+Summary: Watches Python projects and refreshes pages in a browser.
+Home-page: UNKNOWN
+License: UNKNOWN
+Description: # Sneaky Snek
+        
+        This is a WIP/MVP. SS was created in tandem with a Flask web app. The need to refresh the browser automatically brought this about. It is just viable enough to install and run. It will need to be manually configured through the the source, for now.
+        
+        ## TODO
+        
+        - Command line arg folder targets
+        
+        
+Platform: UNKNOWN
+Description-Content-Type: text/markdown
