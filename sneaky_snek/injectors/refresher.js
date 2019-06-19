@@ -24,6 +24,8 @@ const params = {
 	'body' : null
 }
 
+
+
 function refresh(data) {
 	/*
 		if json data changed and static files set to css

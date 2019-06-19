@@ -14,3 +14,5 @@ sneaky_snek/injectors/readme.md
 sneaky_snek/injectors/refresher.js
 tests/context.py
 tests/test_basic.py
+watcher/__init__.py
+watcher/watchFolders.py

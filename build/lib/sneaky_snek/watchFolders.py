@@ -22,9 +22,15 @@ from watchdog.events import FileSystemEventHandler
 
         Place a route to the handle_request() function:
 
+            #watchFolders dumby route used by refresher.js
             @app.route("/check_changes", methods=["GET", 'POST'])
             def check_changes():
-                return Handler.handle_request(app, bytes.decode(request.data))
+                return handler.handle_request(bytes.decode(request.data))
+
+        At the end of your flask app startup code, place:
+
+            handler.update_change_time()
+
 
 		Load up a second terminal to your project directory and activate your venv. Run watchdog.py.
 
@@ -40,7 +46,8 @@ from watchdog.events import FileSystemEventHandler
 
 
 class Watcher:
-    DIR = "/mnt/c/Users/iambj/Repo/HippoTimes/flask-backend/hippo_server"
+    #DIR = "/mnt/c/Users/iambj/Repo/HippoTimes/flask-backend/hippo_server"
+    DIR = "/c/Users/bjoh0003/dev/sneaky-snek"
     DELAY = 5
     # .files are ignored automatically by ''
     IGNORED_FILE_EXTS = ['', '.pyy', '.pyc', '.md', '.devtime', '.map', '.scss']
@@ -89,10 +96,10 @@ class Handler(FileSystemEventHandler):
         if event.is_directory:
             return None
         elif event.event_type == "created":
-            Handler.amend_file()
+            Handler.update_change_time()
             log("Created: " + event.src_path)
         elif event.event_type == "modified":
-            Handler.amend_file()
+            Handler.update_change_time()
             log("Modified: " + event.src_path)
 
     @staticmethod
@@ -104,10 +111,10 @@ class Handler(FileSystemEventHandler):
             f.close()
 
     @staticmethod
-    def make_new_shit():
+    def update_change_time():
         # Updates the local .devtime file with the latest UNIX timestamp.
         # Call this at the end of the initialization process for the app.
-        with open(f'{Watcher.DIR}/.devtime', 'w') as f:
+        with open(f'{Watcher.DIR}/.devtime', 'a+') as f:
             res = str(datetime.now().timestamp())
             f.write(res)
             f.close()
