@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: sneaky-snek
-Version: 0.1.1
+Version: 0.1.2
 Summary: Watches Python projects and refreshes pages in a browser.
 Home-page: UNKNOWN
 License: UNKNOWN
@@ -14,4 +14,7 @@ Description: # Sneaky Snek
         
         
 Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: GPL-3.0
+Classifier: Operating System :: OS Independent
 Description-Content-Type: text/markdown

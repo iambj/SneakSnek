@@ -17,12 +17,13 @@ let adaptiveRate = true
 let refreshFailed = 0;
 
 
-
 const refreshPoint = "http://localhost:5000/check_changes"
 const params = {
 	'method' : 'POST',
 	'body' : null
 }
+
+
 
 function refresh(data) {
 	/*

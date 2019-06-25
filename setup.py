@@ -5,8 +5,6 @@ with open("README.md", "r") as f:
 
 
 
-
-
 setup(
 	name="sneaky_snek",
 	version="0.1.2",

@@ -14,10 +14,16 @@ from watchdog.events import FileSystemEventHandler
 
     Docs:
 
+        This requires running a flask app or something similiar. Below are docs for flask. Any server or framework
+        can work as all you need to do is import the watchFolders module, add a route 
+
 		Import:
 
 			from sneaky_snek import watchFolders
 			handler = watchFolders.Handler()
+
+            Also requires "request" imported from flask
+            from flask import request
 
 
         Place a route to the handle_request() function:
@@ -38,10 +44,6 @@ from watchdog.events import FileSystemEventHandler
 
     Bugs:
 
-		- Has to be run out of the flask-backend folder. this needs to be more flexible. For the .devtime file. 
-		  But there should be a better way for communication. What is this file solving? Its for the other watchdog to say
-		  Python code changed. Duh. Use mine and disable the apps. 
-		- Still double logs a modified file. For both static and python
 '''
 
 

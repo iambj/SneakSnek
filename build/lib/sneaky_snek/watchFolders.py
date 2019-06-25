@@ -38,23 +38,24 @@ from watchdog.events import FileSystemEventHandler
 
     Bugs:
 
-		- Has to be run out of the flask-backend folder. this needs to be more flexible. For the .devtime file. 
-		  But there should be a better way for communication. What is this file solving? Its for the other watchdog to say
-		  Python code changed. Duh. Use mine and disable the apps. 
-		- Still double logs a modified file. For both static and python
 '''
 
 
 class Watcher:
     #DIR = "/mnt/c/Users/iambj/Repo/HippoTimes/flask-backend/hippo_server"
-    DIR = "/c/Users/bjoh0003/dev/sneaky-snek"
-    DELAY = 5
+    DIR = "C:\\Users\\bjoh0003\\dev\\sneaky-snek"
+    DELAY = 100
     # .files are ignored automatically by ''
     IGNORED_FILE_EXTS = ['', '.pyy', '.pyc', '.md', '.devtime', '.map', '.scss']
+    
     WATCHED_DIRS = ['static']
     QUIET_MODE = False
 
+    last_change = 0;
+    modified_files = {}
+
     def __init__(self):
+        
         self.observer = Observer()
         try:
             if sys.argv[1] in ['-q', '--quiet']:
@@ -64,7 +65,6 @@ class Watcher:
                 Watcher.DIR = sys.argv[3]
         except:
             pass
-
 
     def run(self):
         event_handler = Handler()
@@ -80,17 +80,31 @@ class Watcher:
 
 
 
+
 class Handler(FileSystemEventHandler):
     @staticmethod
     def on_any_event(event):
-        # e_path = path.split(event.src_path)
-        # if len(Watcher.WATCHED_DIRS) > 0:
-        #     for d in Watcher.WATCHED_DIRS:
-        #         print(d, e_path)
-        #     return
-
         ext = path.splitext(event.src_path)
+        filename = path.basename(event.src_path)
+        mtime = datetime.now().timestamp()
+        # Check if filename in modified files, if so remove from modified to start over.
+        if (mtime - Watcher.last_change) > 0.015:
+            #print(f"mtime {mtime - Watcher.last_change}")
+            #print("new change")
+            Watcher.last_change = mtime
+        else:
+            # print(Watcher.last_change)
+            #print(f"mtime {mtime - Watcher.last_change}")
+            return
+        # if filename in Watcher.modified_files:
+        #     print(Watcher.modified_files)
+        #     del Watcher.modified_files[filename]
+        #     return
+        # else:
+        #     # Save the timestamp for the file 
+        #     Watcher.modified_files[filename] = mtime # 1 second buffer in case a file gets stuck in the dict somehow. 
         # I think this works, it's a little hacky. Probably a more pythonista way to do it.
+        # TODO: Better filtering. 
         if '.pyc' in event.src_path or ext[1] in Watcher.IGNORED_FILE_EXTS:
             return
         if event.is_directory:
@@ -101,28 +115,27 @@ class Handler(FileSystemEventHandler):
         elif event.event_type == "modified":
             Handler.update_change_time()
             log("Modified: " + event.src_path)
-
-    @staticmethod
-    def amend_file():
-        with open(f'{Watcher.DIR}/.devtime', 'w+') as f:
-            res = str(datetime.now().timestamp())
-            # log(res)
-            f.write(res)
-            f.close()
+    # @staticmethod
+    # def amend_file():
+    #     with open(f'{Watcher.DIR}/.devtime', 'w+') as f:
+    #         res = str(datetime.now().timestamp())
+    #         # log(res)
+    #         f.write(res)
+    #         f.close()
 
     @staticmethod
     def update_change_time():
         # Updates the local .devtime file with the latest UNIX timestamp.
         # Call this at the end of the initialization process for the app.
-        with open(f'{Watcher.DIR}/.devtime', 'a+') as f:
+        with open(f'{Watcher.DIR}/.devtime', 'w+') as f:
             res = str(datetime.now().timestamp())
             f.write(res)
             f.close()
-            # log(res)
 
     @staticmethod
     def handle_request(data):
-        # now = str(datetime.now().timestamp())
+        # Called when /check_changes hit hit. Checks whether
+        # a change occured by comparing the timestamp.
         with open(f'{Watcher.DIR}/.devtime', 'r+') as f:
             then = f.readline()
             f.close()
@@ -136,7 +149,6 @@ class Handler(FileSystemEventHandler):
 def log(msg):
     if Watcher.QUIET_MODE is False:
         print(msg)
-
 
 if __name__ == '__main__':
     w = Watcher()
