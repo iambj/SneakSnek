@@ -1,68 +1,48 @@
 import time
 import sys
-from os import path
+import os
 from datetime import datetime
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-
-'''
-    TODO:
-
-        - Figure out better path for .devtime
-        - Make a quiet mode? Use a command line arg?
-
-    Docs:
-
-        This requires running a flask app or something similiar. Below are docs for flask. Any server or framework
-        can work as all you need to do is import the watchFolders module, add a route 
-
-		Import:
-
-			from sneaky_snek import watchFolders
-			handler = watchFolders.Handler()
-
-            Also requires "request" imported from flask
-            from flask import request
-
-
-        Place a route to the handle_request() function:
-
-            #watchFolders dumby route used by refresher.js
-            @app.route("/check_changes", methods=["GET", 'POST'])
-            def check_changes():
-                return handler.handle_request(bytes.decode(request.data))
-
-        At the end of your flask app startup code, place:
-
-            handler.update_change_time()
-
-
-		Load up a second terminal to your project directory and activate your venv. Run watchdog.py.
-
-        Make sure to send the decoded data as plain text.
-
-    Bugs:
-
-'''
-
-
 class Watcher:
-    #DIR = "/mnt/c/Users/iambj/Repo/HippoTimes/flask-backend/hippo_server"
-    DIR = "C:\\Users\\bjoh0003\\dev\\sneaky-snek"
-    DELAY = 100
-    # .files are ignored automatically by ''
-    IGNORED_FILE_EXTS = ['', '.pyy', '.pyc', '.md', '.devtime', '.map', '.scss']
     
-    WATCHED_DIRS = ['static']
-    QUIET_MODE = False
+    # Change DIR or use the command line argument -d {dir}
+    #DIR = "C:\\Users\\bjoh0003\\dev\\sneaky-snek\\"
+    DIR = "C:\\Users\\iambj\\Repo\\sneaky-snek\\"
+    if os.name == 'posix':
+        DIR = '/mnt/c/Users/iambj/Repo/sneaky-snek'
+        # DIR = '/mnt/c/Users/iambj/Repo/HippoTimes/flask-backend/hippo_server' for testing installing
 
-    last_change = 0;
-    modified_files = {}
+
+    CUSTOM_IGNORED_FILES = ['.devtime', '.md', '.sh'] # These are in adition to the gitfile and can overwrite or be added to it. 
+    
+    DELAY = 500  #Too low can cause the snek to pounce more than once for one change.
+    TIME_DELTA = 0.015  # Adjust this for the same reason above.
+    last_change = 0 # Timestamp in ms of the last change
+
+    # WATCHED_DIRS = ['static'] unused, but maybe a feature later
+    QUIET_MODE = False # Whether any logging to the stdout should occur
+
+    
+
+    # Refactor this out.
+    try:
+        with open("./.gitignore", 'r') as f:
+            gitignore = [line.rstrip() for line in f]
+            if len(gitignore) < 1:
+                print('Warning: .gitfile dected but has no valid entries. Custom ignores will still be loaded. Hint: go to https://www.gitignore.io/ and get one!')
+            else:
+                print(".gitfile found.")
+    except FileNotFoundError as e:
+        print('Warning: No .gitfile dected. Custom ignores will still be loaded. Hint: go to https://www.gitignore.io/ and get one!')
+        pass
+
+    IGNORED_FILES = gitignore + CUSTOM_IGNORED_FILES
+    TOKEN_LOCATION = f'{DIR}/.devtime'
 
     def __init__(self):
-        
-        self.observer = Observer()
+        # Command line args
         try:
             if sys.argv[1] in ['-q', '--quiet']:
                 Watcher.QUIET_MODE = True
@@ -71,6 +51,7 @@ class Watcher:
                 Watcher.DIR = sys.argv[3]
         except:
             pass
+        self.observer = Observer()
 
     def run(self):
         event_handler = Handler()
@@ -81,39 +62,29 @@ class Watcher:
                 time.sleep(Watcher.DELAY)
         except:
             self.observer.stop()
-            log("Woof! Doggy stopped.")
         self.observer.join()
-
-
-
 
 class Handler(FileSystemEventHandler):
     @staticmethod
     def on_any_event(event):
-        ext = path.splitext(event.src_path)
-        filename = path.basename(event.src_path)
         mtime = datetime.now().timestamp()
         # Check if filename in modified files, if so remove from modified to start over.
-        if (mtime - Watcher.last_change) > 0.015:
-            #print(f"mtime {mtime - Watcher.last_change}")
-            #print("new change")
+        if (mtime - Watcher.last_change) > Watcher.TIME_DELTA:
             Watcher.last_change = mtime
-        else:
-            # print(Watcher.last_change)
-            #print(f"mtime {mtime - Watcher.last_change}")
             return
-        # if filename in Watcher.modified_files:
-        #     print(Watcher.modified_files)
-        #     del Watcher.modified_files[filename]
-        #     return
-        # else:
-        #     # Save the timestamp for the file 
-        #     Watcher.modified_files[filename] = mtime # 1 second buffer in case a file gets stuck in the dict somehow. 
-        # I think this works, it's a little hacky. Probably a more pythonista way to do it.
-        # TODO: Better filtering. 
-        if '.pyc' in event.src_path or ext[1] in Watcher.IGNORED_FILE_EXTS:
+            
+        (head, tail) = os.path.split(event.src_path)
+        (_, this_file) = os.path.split(__file__)
+        
+        if tail == this_file:
+            print("KILL", this_file)
+            quit()
+            #simpulate the key stroke?
+            #os.execv(this_file, ())
+
+        if tail in Watcher.IGNORED_FILES:
             return
-        if event.is_directory:
+        elif event.is_directory:
             return None
         elif event.event_type == "created":
             Handler.update_change_time()
@@ -121,38 +92,30 @@ class Handler(FileSystemEventHandler):
         elif event.event_type == "modified":
             Handler.update_change_time()
             log("Modified: " + event.src_path)
-    # @staticmethod
-    # def amend_file():
-    #     with open(f'{Watcher.DIR}/.devtime', 'w+') as f:
-    #         res = str(datetime.now().timestamp())
-    #         # log(res)
-    #         f.write(res)
-    #         f.close()
 
     @staticmethod
     def update_change_time():
         # Updates the local .devtime file with the latest UNIX timestamp.
         # Call this at the end of the initialization process for the app.
-        with open(f'{Watcher.DIR}/.devtime', 'w+') as f:
+        with open(Watcher.TOKEN_LOCATION, 'w+') as f:
             res = str(datetime.now().timestamp())
             f.write(res)
             f.close()
 
     @staticmethod
     def handle_request(data):
-        # Called when /check_changes hit hit. Checks whether
-        # a change occured by comparing the timestamp.
-        with open(f'{Watcher.DIR}/.devtime', 'r+') as f:
+        # Called when /check_changes on the flask server gets hit. Checks whether
+        # a change occurred by comparing the timestamp.
+        with open(Watcher.TOKEN_LOCATION, 'r+') as f:
             then = f.readline()
             f.close()
         if then == data:
             return "same"
         else:
-            # Should return JSON
             return then
 
-
 def log(msg):
+    ''' Utility function for allowing for a quiet execution.'''
     if Watcher.QUIET_MODE is False:
         print(msg)
 

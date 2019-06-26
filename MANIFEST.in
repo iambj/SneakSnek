@@ -1,0 +1,11 @@
+include *.py
+include *.txt
+include LICENSE
+include Pipfile
+recursive-include build *.js
+recursive-include build *.md
+recursive-include build *.py
+recursive-include watcher *.js
+recursive-include watcher *.md
+
+ignore tool

@@ -1,7 +1,13 @@
+LICENSE
+MANIFEST.in
+Pipfile
 README.md
+requirements.txt
+run.py
 setup.cfg
 setup.py
 sneaky_snek/__init__.py
+sneaky_snek/__main__.py
 sneaky_snek/core.py
 sneaky_snek/watchFolders.py
 sneaky_snek.egg-info/PKG-INFO
@@ -10,9 +16,3 @@ sneaky_snek.egg-info/dependency_links.txt
 sneaky_snek.egg-info/not-zip-safe
 sneaky_snek.egg-info/requires.txt
 sneaky_snek.egg-info/top_level.txt
-sneaky_snek/injectors/readme.md
-sneaky_snek/injectors/refresher.js
-tests/context.py
-tests/test_basic.py
-watcher/__init__.py
-watcher/watchFolders.py

@@ -1,3 +1,2 @@
 sneaky_snek
 watchFolders
-watcher

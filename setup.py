@@ -7,7 +7,9 @@ with open("README.md", "r") as f:
 
 setup(
 	name="sneaky_snek",
-	version="0.1.2",
+	version="0.1.3",
+	author="Brandon Johnson",
+	author_email="mail@brandonj.me",
 	packages=find_packages(),
 	include_package_data=True,
 	zip_safe=False,
@@ -17,7 +19,7 @@ setup(
 		'watchdog'
 	],
 	package_data={
-		'': ['sneaky_snek/injectors', '../LICENSE']
+	#	'': ['sneaky_snek/injectors', '../LICENSE']
 	},
   	long_description=long_description,
 	long_description_content_type="text/markdown",

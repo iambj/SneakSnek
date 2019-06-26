@@ -8,6 +8,7 @@
 		- Add config window
 		- Inject css for real (probably should use JSON) ?
 		- Ability to reset the changeRate
+		- custom url for the HTTP call
 */
 let enabled = true;
 let refreshWithoutChange = false;
