@@ -37,6 +37,7 @@ class Watcher:
     except FileNotFoundError as e:
         print('Warning: No .gitfile dected. Custom ignores will still be loaded. Hint: go to https://www.gitignore.io/ and get one!')
         pass
+        
 
     IGNORED_FILES = gitignore + CUSTOM_IGNORED_FILES
     TOKEN_LOCATION = f'{DIR}/.devtime'
